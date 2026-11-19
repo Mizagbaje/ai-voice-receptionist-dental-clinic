@@ -114,6 +114,16 @@ flowchart LR
 - [ ] Warm transfer to a human, with a callback fallback
 - [ ] Shared-secret authentication on the webhooks
 
+## Disclaimer
+
+This project is a demonstration of AI-powered workflow automation for a dental clinic.
+
+- It is not intended for production clinical use.
+- The AI receptionist does not diagnose conditions or provide medical advice.
+- Callers reporting emergencies are directed to emergency services.
+- The CRM uses a Google Sheets-based demonstration setup.
+- A production deployment would require appropriate privacy, security, access controls, data protection compliance, and clinical oversight.
+
 ## About me
 
 I'm Bisi, a data analytics and AI automation specialist. I build workflows that turn data into insights and automate repetitive business tasks.
