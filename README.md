@@ -103,14 +103,32 @@ flowchart LR
 | `screenshots/google-calendar-booking.png` | Screenshot of a booked appointment in Google Calendar |
 | `screenshots/google-sheets-crm.png` | Screenshot of the CRM record in Google Sheets |
 
-## Run it yourself
+## Run It Yourself
 
-1. Create a Vapi assistant and paste in `prompts/ava-system-prompt.md`.
-2. Import both workflow JSON files into n8n, connect your Google account, and publish them.
-3. Create a Vapi function tool named `book_appointment` with string parameters `patient_name`, `phone`, `date_time` (ISO 8601), and `reason`, pointing at the n8n booking webhook.
-4. Set the assistant's Server URL to the CRM logger webhook, with Server Messages set to `end-of-call-report`.
-5. Create a Google Sheet with these headers in row 1: `Call Time, Call ID, Patient Name, Phone, Lead Status, Appointment Time, Reason, Summary, Transcript, Recording URL, Ended Reason, Duration (sec)`.
+1. **Set up Vapi:** Create a Vapi assistant and configure it using the system prompt in `prompts/ava-system-prompt.md`.
 
+2. **Import the n8n workflows:** Import `n8n/booking-workflow.json` and `n8n/crm-logger-workflow.json` into your n8n instance.
+
+3. **Configure credentials and placeholders:** Reconnect your Google Calendar, Google Sheets, Gmail and AI model credentials. Replace the placeholder spreadsheet ID and email address in the CRM logger workflow with your own values.
+
+4. **Configure Google Calendar:** Connect the appropriate calendar and configure the booking workflow to create 30-minute appointments using the `Africa/Lagos` timezone.
+
+5. **Create the Vapi booking tool:** Create a function tool named `book_appointment` with the following string parameters:
+   - `patient_name`
+   - `phone`
+   - `date_time` (ISO 8601 format)
+   - `reason`
+
+   Set the tool's endpoint to the booking workflow webhook URL in n8n.
+
+6. **Configure call reporting:** Set the Vapi assistant's Server URL to the CRM logger webhook URL in n8n and enable the `end-of-call-report` server message.
+
+7. **Set up the CRM spreadsheet:** Create a Google Sheet and add the following headers in row 1:
+
+   `Call Time, Call ID, Patient Name, Phone, Lead Status, Appointment Time, Reason, Summary, Transcript, Recording URL, Ended Reason, Duration (sec)`
+
+8. **Test and activate:** Test appointment booking, call logging, lead status classification and email notifications. Once everything works as expected, activate both n8n workflows.
+   
 ## Roadmap
 
 - [ ] Outbound calls to leads, with voicemail detection and retry cadence
