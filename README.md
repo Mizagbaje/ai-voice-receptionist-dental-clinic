@@ -147,7 +147,12 @@ This project is a demonstration of AI-powered workflow automation for a dental c
 - The CRM uses a Google Sheets-based demonstration setup.
 - A production deployment would require appropriate privacy, security, access controls, data protection compliance, and clinical oversight.
 
-## About me
 
-I'm Bisi, a data analytics and AI automation specialist. I build workflows that turn data into insights and automate repetitive business tasks.
+## About Me
+
+I'm Bisi, a pharmacist transitioning into Healthcare Data Analytics and AI Automation. I build data-driven solutions and automated workflows that improve processes, support decision-making, and reduce repetitive tasks.
+
+My projects combine healthcare knowledge, data analytics and AI automation to solve practical business problems.
+
+**Tools:** Excel, SQL, Power BI, Python, n8n, Zapier, API integrations and AI-powered automation.
 
