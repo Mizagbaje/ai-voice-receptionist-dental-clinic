@@ -4,7 +4,7 @@ An AI phone receptionist that answers calls, qualifies the caller, books the app
 
 > **Demo video:** _add your Loom/YouTube link here_
 
-![Workflow screenshot](docs/workflow-screenshot.png)
+![Workflow screenshot]("C:\Users\USER\Pictures\Screenshots\Bright Smile-Call CRM Logger.png")
 
 ## The problem
 
