@@ -2,10 +2,11 @@
 
 An AI phone receptionist that answers calls, qualifies the caller, books the appointment, and writes every call into a CRM with an AI-generated summary. The clinic team gets an email alert for new bookings and urgent calls. No manual data entry.
 
-> **Demo video:** _add your Loom/YouTube link here_
+## Demo
 
-![Workflow screenshot]("C:\Users\USER\Pictures\Screenshots\Bright Smile-Call CRM Logger.png")
+**Demo video:** [Watch the AI Voice Receptionist Demo on Loom](https://www.loom.com/share/6e319909b2a3402ba227402bd240f459)
 
+![CRM Logger Workflow](screenshots/crm-logger-workflow.png)
 ## The problem
 
 Small clinics miss calls and lose leads. Staff are busy with patients, calls go to voicemail, and details from calls that are answered end up on sticky notes instead of in a system.
