@@ -76,18 +76,18 @@ flowchart LR
 | No answer | The call ended in voicemail or with no pickup |
 | Follow up | Anything else |
 
-## Problems I hit and how I fixed them
+## Problems I Hit and How I Fixed Them
 
-| Problem | Fix |
+| **Problem** | **Fix** |
 |---|---|
-| The prompt told Ava not to "promise an appointment" while also asking her to book one, so her behaviour was inconsistent | Rewrote the prompt with separate sections for booking, messages, rules, and emergencies |
-| n8n blocks any expression that reads a field named `arguments`, and Vapi sends tool data in exactly that field, so the booking crashed | Replaced the Set node with a Code node that reads the payload safely and never throws |
-| Ava said "booked" even though the tool had failed | Made the webhook always respond, added a failure path, and told Ava to confirm only after a success result |
-| Vapi tool parameter names were corrupted by pasted text and worked only because the model guessed | Recreated the four parameters with exact names |
-| The AI summary step used a model option that is now deprecated, returned a 400 error, and stopped the whole chain, so no rows were logged | Removed the option, made the summary step non-blocking, and ran the sheet write and email alert as parallel branches |
-| The Sheets node outputs sheet column names, not the original call fields, which would have broken the alert branch | Branched the alert off the merged row instead of the sheet node |
-| Speech-to-text garbled names (for example "Demian Dhu" became "Demiandoux") | Added name-spelling confirmation and tuned Vapi's endpointing so Ava waits between letters |
-| A hard-coded date in the prompt made "tomorrow" wrong | Switched to Vapi's live date variable with the Africa/Lagos time zone |
+| The prompt instructed Ava not to promise appointments while also requiring her to book them, resulting in inconsistent behaviour. | Restructured the prompt into clearly defined sections for booking, communication, rules and emergency handling. |
+| The n8n workflow had difficulty handling Vapi's tool-call payload structure. | Replaced the Set node with a Code node to extract and process the incoming tool-call data. |
+| Ava confirmed appointments even when the booking tool failed. | Added success and failure response paths to the webhook and instructed Ava to confirm bookings only after receiving a successful response. |
+| Vapi tool parameter names were incorrectly formatted after pasting, causing unreliable tool calls. | Recreated the four tool parameters using their exact required names and data types. |
+| The AI summarisation step returned a 400 error due to a deprecated model option, interrupting the workflow. | Removed the deprecated option, made the summary step non-blocking, and separated the CRM write and email alert into parallel branches. |
+| The Google Sheets node returned spreadsheet fields instead of the original call data, affecting downstream email alerts. | Routed the email alert from the merged data branch instead of relying on the Google Sheets node output. |
+| Speech recognition misinterpreted patient names, making accurate records difficult. | Added name-spelling confirmation and adjusted Vapi endpointing settings to allow callers to spell their names clearly. |
+| A hard-coded date in the prompt caused incorrect interpretation of relative dates such as "tomorrow". | Replaced the hard-coded date with Vapi's dynamic date variable and configured the assistant for the Africa/Lagos timezone. |
 
 ## Repository Contents
 
