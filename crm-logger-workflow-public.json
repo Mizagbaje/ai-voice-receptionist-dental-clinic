@@ -1,0 +1,382 @@
+{
+  "name": "Bright Smile - Call CRM Logger",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vapi-call-report",
+        "options": {}
+      },
+      "id": "2d36fb16-caf7-4fb4-9d8f-b94ea7f96cde",
+      "name": "Vapi Call Report Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json || {};\nconst body = input.body || input;\nconst msg = body.message || {};\nif (msg.type !== 'end-of-call-report') { return []; }\n\nconst call = msg.call || {};\nconst artifact = msg.artifact || {};\nconst analysis = msg.analysis || {};\nconst transcript = String(msg.transcript || artifact.transcript || '');\nconst messages = artifact.messages || msg.messages || [];\nconst endedReason = String(msg.endedReason || call.endedReason || '');\n\nlet args = {};\nfor (const m of messages) {\n  const tc = m && m.toolCalls && m.toolCalls[0];\n  if (tc && tc.function && tc.function.name === 'book_appointment') {\n    let a = tc.function.arguments;\n    if (typeof a === 'string') { try { a = JSON.parse(a); } catch (e) { a = {}; } }\n    args = a || {};\n  }\n}\n\nconst booked = JSON.stringify(messages).includes('Appointment booked for');\nconst userText = transcript.split('\\n').filter(function (l) { return /^user:/i.test(l); }).join(' ');\nconst urgent = /urgent|severe pain|swelling|bleeding|emergency/i.test(userText);\nconst noAnswer = /voicemail|no-answer|did-not-answer|busy/i.test(endedReason);\n\nlet leadStatus = 'Follow up';\nif (booked) { leadStatus = 'Booked'; }\nelse if (urgent) { leadStatus = 'Urgent - call back'; }\nelse if (noAnswer) { leadStatus = 'No answer'; }\n\nreturn [{\n  json: {\n    callTime: msg.endedAt || new Date().toISOString(),\n    callId: call.id || '',\n    patientName: args.patient_name || '',\n    phone: (call.customer && call.customer.number) || args.phone || '',\n    leadStatus: leadStatus,\n    appointmentTime: booked ? (args.date_time || '') : '',\n    reason: args.reason || '',\n    summary: analysis.summary || msg.summary || '',\n    transcript: transcript.slice(0, 40000),\n    recordingUrl: msg.recordingUrl || artifact.recordingUrl || '',\n    endedReason: endedReason,\n    durationSeconds: msg.durationSeconds || ''\n  }\n}];"
+      },
+      "id": "796f630d-dca3-4a96-8851-850035fd51dc",
+      "name": "Build CRM Row",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        544,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Demo CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1p941OSugLS_A8-6tGZvOl7ko2aW9CZ0m8ERmIG9pQ1k/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Appointment Time": "={{ $json.appointmentTime }}",
+            "Call ID": "={{ $json.callId }}",
+            "Call Time": "={{ $json.callTime }}",
+            "Duration (sec)": "={{ $json.durationSeconds }}",
+            "Ended Reason": "={{ $json.endedReason }}",
+            "Lead Status": "={{ $json.leadStatus }}",
+            "Patient Name": "={{ $json.patientName }}",
+            "Phone": "={{ $json.phone }}",
+            "Reason": "={{ $json.reason }}",
+            "Recording URL": "={{ $json.recordingUrl }}",
+            "Summary": "={{ $json.summary }}",
+            "Transcript": "={{ $json.transcript }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "Call Time",
+              "id": "Call Time",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "Call ID",
+              "id": "Call ID",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "Patient Name",
+              "id": "Patient Name",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "Phone",
+              "id": "Phone",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "Lead Status",
+              "id": "Lead Status",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "Appointment Time",
+              "id": "Appointment Time",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "Reason",
+              "id": "Reason",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "Summary",
+              "id": "Summary",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "Transcript",
+              "id": "Transcript",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "Recording URL",
+              "id": "Recording URL",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "Ended Reason",
+              "id": "Ended Reason",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "Duration (sec)",
+              "id": "Duration (sec)",
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "6e057fa6-cb73-41b2-873f-29f82a3aed0b",
+      "name": "Log Call to CRM Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1440,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Bright Smile CRM logger\nVapi sends an end-of-call report here after every call.\n- Builds one row per call: name, phone, lead status, summary, transcript, recording\n- Lead status: Booked / Urgent - call back / No answer / Follow up\n- Sheet needs these headers in row 1: Call Time, Call ID, Patient Name, Phone, Lead Status, Appointment Time, Reason, Summary, Transcript, Recording URL, Ended Reason, Duration (sec)",
+        "height": 176,
+        "width": 768,
+        "color": 4
+      },
+      "id": "bc9c4e54-de9c-438b-b141-520a7a27ba5b",
+      "name": "Sticky Note 122b696b",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const row = $('Build CRM Row').first().json;\nconst ai = $input.first().json || {};\nlet s = ai.text || ai.data || '';\nif (!s && ai.content && ai.content[0]) { s = ai.content[0].text || ''; }\ns = String(s).trim();\nreturn [{ json: Object.assign({}, row, { summary: s || row.summary || '' }) }];"
+      },
+      "id": "36ac3112-cc82-4d5f-be25-1cbd2417d2b5",
+      "name": "Merge Summary Into Row",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1136,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "or",
+          "conditions": [
+            {
+              "id": "alert-booked",
+              "leftValue": "={{ $json.leadStatus }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "Booked"
+            },
+            {
+              "id": "alert-urgent",
+              "leftValue": "={{ $json.leadStatus }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "Urgent - call back"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "id": "bc9d72fb-f93f-49b9-93ca-1c3be33d94f5",
+      "name": "Needs Team Alert?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_EMAIL_ADDRESS",
+        "subject": "=Bright Smile: {{ $json.leadStatus }} - {{ $json.patientName || 'Unknown caller' }}",
+        "emailType": "text",
+        "message": "=A new call was logged at Bright Smile Dental.\n\nStatus: {{ $json.leadStatus }}\nPatient: {{ $json.patientName }}\nPhone: {{ $json.phone }}\nAppointment: {{ $json.appointmentTime }}\nReason: {{ $json.reason }}\n\nSummary: {{ $json.summary }}\n\nRecording: {{ $json.recordingUrl }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Ava - Bright Smile Dental"
+        }
+      },
+      "id": "7b2fc1c4-8448-4e9a-b153-f7e4c67bdac1",
+      "name": "Email Team",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1744,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-haiku-5-5"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Summarize this phone call between a caller and the receptionist at Bright Smile Dental.\n\nTranscript:\n{{ $json.transcript }}"
+            }
+          ]
+        },
+        "options": {
+          "includeMergedResponse": true,
+          "system": "You write one-line call summaries for dental clinic staff. Write exactly one sentence of at most 30 words covering who called, what they wanted, and the outcome (appointment booked for a time, or callback needed). Mention if the call sounded urgent. No preamble, no quotes.",
+          "maxTokens": 150
+        }
+      },
+      "id": "187b9c01-1558-4588-a501-d8393539b296",
+      "name": "Write Call Summary",
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        848,
+        304
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Vapi Call Report Webhook": {
+      "main": [
+        [
+          {
+            "node": "Build CRM Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Summary Into Row": {
+      "main": [
+        [
+          {
+            "node": "Log Call to CRM Sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Needs Team Alert?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs Team Alert?": {
+      "main": [
+        [
+          {
+            "node": "Email Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build CRM Row": {
+      "main": [
+        [
+          {
+            "node": "Write Call Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Call Summary": {
+      "main": [
+        [
+          {
+            "node": "Merge Summary Into Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "nodeGroups": [],
+  "tags": []
+}
