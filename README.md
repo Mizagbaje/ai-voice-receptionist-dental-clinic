@@ -35,6 +35,19 @@ flowchart LR
     F --> H{Booked or urgent?}
     H -->|yes| I[Email alert to clinic team]
 ```
+## Project Screenshots
+
+### 1. Booking Workflow
+![Booking Workflow](screenshots/booking-workflow.png)
+
+### 2. CRM Logger Workflow
+![CRM Logger Workflow](screenshots/crm-logger-workflow.png)
+
+### 3. Google Calendar Appointment
+![Google Calendar Booking](screenshots/google-calendar-booking.png)
+
+### 4. Google Sheets CRM
+![Google Sheets CRM](screenshots/google-sheets-crm.png)
 
 ## Tech stack
 
