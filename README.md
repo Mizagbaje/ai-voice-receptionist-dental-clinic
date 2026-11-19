@@ -131,11 +131,12 @@ flowchart LR
    
 ## Roadmap
 
-- [ ] Outbound calls to leads, with voicemail detection and retry cadence
-- [ ] Post-call text or email to the caller
-- [ ] Warm transfer to a human, with a callback fallback
-- [ ] Shared-secret authentication on the webhooks
-
+- Outbound calls to prospective patients, including voicemail detection and automated retry scheduling.
+- Post-call SMS or email confirmations and follow-ups.
+- Warm call transfer to a human receptionist, with a callback fallback when unavailable.
+- Webhook authentication using shared secrets to improve workflow security.
+- Improved error handling and monitoring for failed bookings and call-processing workflows.
+  
 ## Disclaimer
 
 This project is a demonstration of AI-powered workflow automation for a dental clinic.
