@@ -6,7 +6,6 @@ An AI phone receptionist that answers calls, qualifies the caller, books the app
 
 **Demo video:** [Watch the AI Voice Receptionist Demo on Loom](https://www.loom.com/share/6e319909b2a3402ba227402bd240f459)
 
-![CRM Logger Workflow](screenshots/crm-logger-workflow.png)
 ## The problem
 
 Small clinics miss calls and lose leads. Staff are busy with patients, calls go to voicemail, and details from calls that are answered end up on sticky notes instead of in a system.
