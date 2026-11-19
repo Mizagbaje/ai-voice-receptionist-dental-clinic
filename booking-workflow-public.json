@@ -1,0 +1,161 @@
+{
+  "name": "Bright Smile - Vapi Booking Tool",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "book-appointment",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "5cba0fdc-5bef-4ba5-905c-3f658a44d7f2",
+      "name": "Vapi Booking Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        80,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "REPLACE_WITH_YOUR_GOOGLE_CALENDAR_ID",
+          "mode": "list",
+          "cachedResultName": "Demo Calendar (replace)"
+        },
+        "start": "={{ DateTime.fromISO($json.dateTime, { zone: \"Africa/Lagos\" }).toISO() }}",
+        "end": "={{ DateTime.fromISO($json.dateTime, { zone: \"Africa/Lagos\" }).plus({ minutes: 30 }).toISO() }}",
+        "additionalFields": {
+          "description": "=Patient: {{ $json.patientName }}\nPhone: {{ $json.phone }}\nReason: {{ $json.reason }}\nBooked by: Ava (Vapi voice agent)",
+          "summary": "=Dental appointment: {{ $json.patientName }}"
+        }
+      },
+      "id": "cd70b18f-416c-4160-a82f-19550f3fd874",
+      "name": "Create Calendar Event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.4,
+      "position": [
+        672,
+        304
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"results\": [ { \"toolCallId\": $(\"Extract Booking Details\").item.json.toolCallId, \"result\": \"Appointment booked for \" + DateTime.fromISO($(\"Extract Booking Details\").item.json.dateTime, { zone: \"Africa/Lagos\" }).toFormat(\"cccc, LLLL d, h:mm a\") + \" for \" + $(\"Extract Booking Details\").item.json.patientName + \".\" } ] } }}",
+        "options": {}
+      },
+      "id": "df9c7ef2-c284-41aa-a5a3-999e1798151a",
+      "name": "Respond Booking Confirmed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        992,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"results\": [ { \"toolCallId\": $(\"Extract Booking Details\").item.json.toolCallId, \"result\": \"The booking could not be completed. Apologize to the caller and offer a callback from the team to confirm the appointment.\" } ] } }}",
+        "options": {}
+      },
+      "id": "8a8242c8-88f8-4860-9b10-61a4efbcc548",
+      "name": "Respond Booking Failed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1008,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Bright Smile booking tool\nVapi calls this webhook when the agent uses the book_appointment tool.\n- date_time must be ISO 8601 (e.g. 2026-11-19T10:00:00)\n- Calendar is set to \"primary\": switch to a test calendar while testing\n- Failure path still replies so the agent never goes silent",
+        "height": 80,
+        "width": 512,
+        "color": 4
+      },
+      "id": "b00c3fa1-4c8b-4053-a073-c2002c43dcc5",
+      "name": "Sticky Note fb00bc54",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json || {};\nconst body = input.body || input;\nconst msg = body.message || {};\nconst call = (msg.toolCallList && msg.toolCallList[0]) || (msg.toolCalls && msg.toolCalls[0]) || {};\nconst fn = call.function || {};\nlet args = fn.arguments !== undefined ? fn.arguments : (call.arguments || {});\nif (typeof args === 'string') {\n  try { args = JSON.parse(args); } catch (e) { args = {}; }\n}\nif (!args || typeof args !== 'object') { args = {}; }\nreturn [{\n  json: {\n    toolCallId: call.id || 'test-call',\n    patientName: args.patient_name || body.patient_name || 'Unknown patient',\n    phone: args.phone || body.phone || '',\n    dateTime: args.date_time || body.date_time || '',\n    reason: args.reason || body.reason || 'General appointment'\n  }\n}];"
+      },
+      "id": "08824301-8270-41c1-b7ec-6d2a6177a4b9",
+      "name": "Extract Booking Details",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        304
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Create Calendar Event": {
+      "main": [
+        [
+          {
+            "node": "Respond Booking Confirmed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Booking Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vapi Booking Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Booking Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Booking Details": {
+      "main": [
+        [
+          {
+            "node": "Create Calendar Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "b5b3edf9-e5ec-4bf7-b4c7-f92549b4da4f",
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "nodeGroups": [],
+  "tags": []
+}
