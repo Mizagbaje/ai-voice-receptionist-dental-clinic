@@ -89,15 +89,19 @@ flowchart LR
 | Speech-to-text garbled names (for example "Demian Dhu" became "Demiandoux") | Added name-spelling confirmation and tuned Vapi's endpointing so Ava waits between letters |
 | A hard-coded date in the prompt made "tomorrow" wrong | Switched to Vapi's live date variable with the Africa/Lagos time zone |
 
-## Repository contents
+## Repository Contents
 
-| Path | What it is |
+| **Path** | **What it is** |
 |---|---|
-| `prompts/ava-system-prompt.md` | The receptionist's system prompt |
-| `n8n/extract-booking-details.js` | Code node for the booking workflow |
-| `n8n/build-crm-row.js` | Code node that turns an end-of-call report into a CRM row and lead status |
-| `n8n/booking-workflow.json` | Exported n8n booking workflow (add after exporting, see below) |
-| `n8n/crm-logger-workflow.json` | Exported n8n CRM logger workflow (add after exporting, see below) |
+| `prompts/ava-system-prompt.md` | Ava's system prompt and receptionist instructions |
+| `n8n/extract-booking-details.js` | Code node that extracts appointment booking details from incoming tool calls |
+| `n8n/build-crm-row.js` | Code node that processes call reports, determines lead status, and prepares CRM records |
+| `n8n/booking-workflow.json` | Sanitised export of the n8n appointment booking workflow |
+| `n8n/crm-logger-workflow.json` | Sanitised export of the n8n call logging and email notification workflow |
+| `screenshots/booking-workflow.png` | Screenshot of the appointment booking workflow |
+| `screenshots/crm-logger-workflow.png` | Screenshot of the CRM logging workflow |
+| `screenshots/google-calendar-booking.png` | Screenshot of a booked appointment in Google Calendar |
+| `screenshots/google-sheets-crm.png` | Screenshot of the CRM record in Google Sheets |
 
 ## Run it yourself
 
