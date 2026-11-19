@@ -1,0 +1,48 @@
+const input = $input.first().json || {};
+const body = input.body || input;
+const msg = body.message || {};
+if (msg.type !== 'end-of-call-report') { return []; }
+
+const call = msg.call || {};
+const artifact = msg.artifact || {};
+const analysis = msg.analysis || {};
+const transcript = String(msg.transcript || artifact.transcript || '');
+const messages = artifact.messages || msg.messages || [];
+const endedReason = String(msg.endedReason || call.endedReason || '');
+
+let args = {};
+for (const m of messages) {
+  const tc = m && m.toolCalls && m.toolCalls[0];
+  if (tc && tc.function && tc.function.name === 'book_appointment') {
+    let a = tc.function.arguments;
+    if (typeof a === 'string') { try { a = JSON.parse(a); } catch (e) { a = {}; } }
+    args = a || {};
+  }
+}
+
+const booked = JSON.stringify(messages).includes('Appointment booked for');
+const userText = transcript.split('\n').filter(function (l) { return /^user:/i.test(l); }).join(' ');
+const urgent = /urgent|severe pain|swelling|bleeding|emergency/i.test(userText);
+const noAnswer = /voicemail|no-answer|did-not-answer|busy/i.test(endedReason);
+
+let leadStatus = 'Follow up';
+if (booked) { leadStatus = 'Booked'; }
+else if (urgent) { leadStatus = 'Urgent - call back'; }
+else if (noAnswer) { leadStatus = 'No answer'; }
+
+return [{
+  json: {
+    callTime: msg.endedAt || new Date().toISOString(),
+    callId: call.id || '',
+    patientName: args.patient_name || '',
+    phone: (call.customer && call.customer.number) || args.phone || '',
+    leadStatus: leadStatus,
+    appointmentTime: booked ? (args.date_time || '') : '',
+    reason: args.reason || '',
+    summary: analysis.summary || msg.summary || '',
+    transcript: transcript.slice(0, 40000),
+    recordingUrl: msg.recordingUrl || artifact.recordingUrl || '',
+    endedReason: endedReason,
+    durationSeconds: msg.durationSeconds || ''
+  }
+}];
